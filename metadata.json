@@ -1,0 +1,8 @@
+{
+  "name": "PadelCoach AI",
+  "description": "Tu entrenador personal de pádel potenciado por IA. Registra tus entrenamientos y analiza tus vídeos para mejorar tu técnica.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
