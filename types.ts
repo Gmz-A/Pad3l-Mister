@@ -25,3 +25,18 @@ export interface AnalysisHistory {
   videoUrl?: string;
   analysis?: AnalysisResult;
 }
+
+export interface SetScore {
+  myScore: number;
+  opponentScore: number;
+}
+
+export interface Match {
+  id: string;
+  date: string;
+  result: 'Victoria' | 'Derrota';
+  sets: SetScore[];
+  positiveShots: ShotType[];
+  improvementShots: ShotType[];
+  notes?: string;
+}

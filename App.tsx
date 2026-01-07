@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Video, ClipboardList, TrendingUp, Award, Settings, Plus, Play, Info } from 'lucide-react';
+import { LayoutDashboard, Video, ClipboardList, TrendingUp, Award, BookOpen, Trophy } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import TrainingLogView from './components/TrainingLogView';
 import VideoAnalysisView from './components/VideoAnalysisView';
-import { TrainingSession, AnalysisHistory } from './types';
+import VisualLearningView from './components/VisualLearningView';
+import MatchLogView from './components/MatchLogView';
+import { TrainingSession, AnalysisHistory, Match } from './types';
 
 const App: React.FC = () => {
   const [sessions, setSessions] = useState<TrainingSession[]>(() => {
@@ -18,6 +20,11 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [matches, setMatches] = useState<Match[]>(() => {
+    const saved = localStorage.getItem('padel_matches');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => {
     localStorage.setItem('padel_sessions', JSON.stringify(sessions));
   }, [sessions]);
@@ -26,12 +33,20 @@ const App: React.FC = () => {
     localStorage.setItem('padel_analyses', JSON.stringify(analyses));
   }, [analyses]);
 
+  useEffect(() => {
+    localStorage.setItem('padel_matches', JSON.stringify(matches));
+  }, [matches]);
+
   const addSession = (session: TrainingSession) => {
     setSessions(prev => [session, ...prev]);
   };
 
   const addAnalysis = (analysis: AnalysisHistory) => {
     setAnalyses(prev => [analysis, ...prev]);
+  };
+
+  const addMatch = (match: Match) => {
+    setMatches(prev => [match, ...prev]);
   };
 
   return (
@@ -49,7 +64,9 @@ const App: React.FC = () => {
           <nav className="space-y-1">
             <NavLink to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
             <NavLink to="/logs" icon={<ClipboardList size={20} />} label="Entrenamientos" />
+            <NavLink to="/matches" icon={<Trophy size={20} />} label="Partidos" />
             <NavLink to="/analysis" icon={<Video size={20} />} label="Análisis de Vídeo" />
+            <NavLink to="/learning" icon={<BookOpen size={20} />} label="Aprendizaje Visual" />
             <NavLink to="/stats" icon={<TrendingUp size={20} />} label="Progresión" />
           </nav>
 
@@ -70,17 +87,21 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Dashboard sessions={sessions} analyses={analyses} />} />
               <Route path="/logs" element={<TrainingLogView sessions={sessions} onAddSession={addSession} />} />
+              <Route path="/matches" element={<MatchLogView matches={matches} onAddMatch={addMatch} />} />
               <Route path="/analysis" element={<VideoAnalysisView analyses={analyses} onAddAnalysis={addAnalysis} />} />
+              <Route path="/learning" element={<VisualLearningView />} />
               <Route path="/stats" element={<div className="flex flex-col items-center justify-center h-64 text-slate-400"><TrendingUp size={48} className="mb-4" /><p>Próximamente: Gráficas detalladas de tu evolución</p></div>} />
             </Routes>
           </div>
         </main>
 
         {/* Mobile bottom nav */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around p-3 z-50">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 grid grid-cols-6 text-center p-2 z-50">
            <MobileNavLink to="/" icon={<LayoutDashboard size={24} />} />
            <MobileNavLink to="/logs" icon={<ClipboardList size={24} />} />
+           <MobileNavLink to="/matches" icon={<Trophy size={24} />} />
            <MobileNavLink to="/analysis" icon={<Video size={24} />} />
+           <MobileNavLink to="/learning" icon={<BookOpen size={24} />} />
            <MobileNavLink to="/stats" icon={<TrendingUp size={24} />} />
         </div>
       </div>
@@ -106,7 +127,7 @@ const MobileNavLink: React.FC<{ to: string, icon: React.ReactNode }> = ({ to, ic
   const location = useLocation();
   const active = location.pathname === to;
   return (
-    <Link to={to} className={`p-2 rounded-lg transition-colors ${active ? 'text-lime-400' : 'text-slate-400'}`}>
+    <Link to={to} className={`p-2 rounded-lg transition-colors inline-flex justify-center ${active ? 'text-lime-400' : 'text-slate-400'}`}>
       {icon}
     </Link>
   );

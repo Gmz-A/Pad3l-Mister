@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { TrainingSession, ShotType } from '../types';
-import { Plus, ClipboardList, Trash2, X } from 'lucide-react';
+import { Plus, ClipboardList, Filter, X } from 'lucide-react';
 
 interface TrainingLogViewProps {
   sessions: TrainingSession[];
@@ -12,6 +12,7 @@ const SHOT_TYPES: ShotType[] = ['Derecha', 'Revés', 'Volea', 'Bandeja', 'Víbor
 
 const TrainingLogView: React.FC<TrainingLogViewProps> = ({ sessions, onAddSession }) => {
   const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState<ShotType | 'Todos'>('Todos');
   const [formData, setFormData] = useState({
     shots: [] as ShotType[],
     duration: 60,
@@ -49,6 +50,10 @@ const TrainingLogView: React.FC<TrainingLogViewProps> = ({ sessions, onAddSessio
     });
   };
 
+  const filteredSessions = sessions.filter(session => 
+    filter === 'Todos' || session.shots.includes(filter)
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -65,15 +70,47 @@ const TrainingLogView: React.FC<TrainingLogViewProps> = ({ sessions, onAddSessio
         </button>
       </div>
 
+      {/* Filter Bar */}
+      <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            <button
+                onClick={() => setFilter('Todos')}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all shrink-0 ${
+                    filter === 'Todos'
+                        ? 'bg-lime-400 text-slate-900'
+                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                }`}
+            >
+                Todos
+            </button>
+            {SHOT_TYPES.map(shot => (
+                <button
+                    key={shot}
+                    onClick={() => setFilter(shot)}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all shrink-0 ${
+                        filter === shot
+                            ? 'bg-lime-400 text-slate-900'
+                            : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                    }`}
+                >
+                    {shot}
+                </button>
+            ))}
+        </div>
+      </div>
+
+
       <div className="grid gap-4">
-        {sessions.length === 0 ? (
+        {filteredSessions.length === 0 ? (
           <div className="text-center py-12 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700">
             <ClipboardList size={48} className="mx-auto text-slate-600 mb-4" />
-            <p className="text-slate-500">No hay sesiones registradas.</p>
+            <p className="text-slate-500">
+              {sessions.length === 0 ? 'No hay sesiones registradas.' : 'No hay sesiones que coincidan con el filtro.'}
+            </p>
           </div>
         ) : (
-          sessions.map(s => (
-            <div key={s.id} className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          filteredSessions.map(s => (
+            <div key={s.id} className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in duration-300">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
@@ -87,7 +124,7 @@ const TrainingLogView: React.FC<TrainingLogViewProps> = ({ sessions, onAddSessio
                 </div>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {s.shots.map(shot => (
-                    <span key={shot} className="bg-slate-700 text-slate-200 px-3 py-1 rounded-full text-xs font-medium border border-slate-600">
+                    <span key={shot} className={`px-3 py-1 rounded-full text-xs font-medium border ${filter === shot ? 'bg-lime-400/20 text-lime-300 border-lime-400/30' : 'bg-slate-700 text-slate-200 border-slate-600'}`}>
                       {shot}
                     </span>
                   ))}
